@@ -6,7 +6,7 @@ const createOrder = (newOrder) => {
     return new Promise(async (resolve, reject) => {
         const { orderItems, paymentMethod, itemsPrice, shippingPrice, totalPrice, fullName, address, city, phone, user, isPaid, paidAt, email } = newOrder
         try {
-            const promise = orderItems.map(async (order) => {
+            const promises = orderItems.map(async (order) => {
                 const productData = await Product.findOneAndUpdate(
                     {
                         _id: order.product,
@@ -18,34 +18,15 @@ const createOrder = (newOrder) => {
                             selled: +order.amount
                         }
                     },
-                    {
-                        new: true
-                    }
+                    { new: true }
                 )
                 if (productData) {
-                    const createdOrder = await Order.create({
-                        orderItems,
-                        shippingAddress: {
-                            fullName,
-                            address,
-                            city,
-                            phone
-                        },
-                        paymentMethod,
-                        itemsPrice,
-                        shippingPrice,
-                        totalPrice,
-                        user: user,
-                        isPaid, paidAt
-                    })
-                    if (createdOrder) {
-                        await EmailService.sendEmailCreateOrder(email, orderItems)
-                        return {
-                            status: 'OK',
-                            message: 'SUCCESS'
-                        }
+                    return {
+                        status: 'OK',
+                        message: 'SUCCESS'
                     }
-                } else {
+                }
+                else {
                     return {
                         status: 'OK',
                         message: 'ERR',
@@ -53,24 +34,47 @@ const createOrder = (newOrder) => {
                     }
                 }
             })
-            const results = await Promise.all(promise)
+            const results = await Promise.all(promises)
             const newData = results && results.filter((item) => item.id)
             if (newData.length) {
+                const arrId = []
+                newData.forEach((item) => {
+                    arrId.push(item.id)
+                })
                 resolve({
                     status: 'ERR',
-                    message: `San pham voi id: ${newData.join(',')} khong du hang`
+                    message: `San pham voi id: ${arrId.join(',')} khong du hang`
                 })
+            } else {
+                const createdOrder = await Order.create({
+                    orderItems,
+                    shippingAddress: {
+                        fullName,
+                        address,
+                        city, phone
+                    },
+                    paymentMethod,
+                    itemsPrice,
+                    shippingPrice,
+                    totalPrice,
+                    user: user,
+                    isPaid, paidAt
+                })
+                if (createdOrder) {
+                    await EmailService.sendEmailCreateOrder(email, orderItems)
+                    resolve({
+                        status: 'OK',
+                        message: 'success'
+                    })
+                }
             }
-
-            resolve({
-                status: 'OK',
-                message: 'success'
-            })
         } catch (e) {
+            //   console.log('e', e)
             reject(e)
         }
     })
 }
+
 
 const getAllOrderDetails = (id) => {
     return new Promise(async (resolve, reject) => {

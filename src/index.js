@@ -21,13 +21,13 @@ routes(app);
 
 mongoose.connect(`${process.env.MONGO_DB}`)
     .then(() => {
-        console.log('Connect DB success!')
+        //  console.log('Connect DB success!')
     })
     .catch((err) => {
-        console.log(err)
+        //  console.log(err)
     })
 
 
 app.listen(port, () => {
-    console.log('Server is running in port: ', + port)
+    //  console.log('Server is running in port: ', + port)
 })
