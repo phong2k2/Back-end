@@ -36,9 +36,9 @@ const sendEmailCreateOrder = async (email, orderItems) => {
             attachments: attachImage,
         });
 
-        console.log("Email sent: %s", info.messageId);
+     //   console.log("Email sent: %s", info.messageId);
     } catch (error) {
-        console.error("Error sending email:", error);
+      //  console.error("Error sending email:", error);
     }
 };
 
